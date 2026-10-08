@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Curve Lab</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+:root{--bg:#262a2e;--pnl:#3a4147;--pnl2:#31373c;--well:#1f2327;--line:#15181b;--hi:#566069;--grid:#2c3238;--grid2:#454e56;--tx:#d3dae0;--mut:#8e99a3;--ac:#f39c2d;--ok:#79c94f;--hot:#ee4b3d;--hd:#4cc3e8;--mono:"IBM Plex Mono",Consolas,Menlo,monospace;color-scheme:dark;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+*{box-sizing:border-box}html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--tx);font:12.5px/1.4 Inter,"Helvetica Neue",Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased}
+.wrap{max-width:720px;margin:0 auto;padding:10px}
+.card{background:linear-gradient(var(--pnl),var(--pnl2));border:1px solid var(--line);border-radius:3px;padding:10px;box-shadow:inset 0 1px 0 var(--hi)}
+h1{font-size:13px;font-weight:600;margin:0 0 2px;letter-spacing:.2px}p.sub{margin:0 0 8px;color:var(--mut);font-size:11.5px}
+.plot{position:relative;background:var(--well);border:1px solid var(--line);border-radius:2px;box-shadow:inset 0 1px 3px rgba(0,0,0,.5)}
+svg{width:100%;height:auto;display:block;touch-action:none;user-select:none;font-family:inherit}
+.pp{position:absolute;top:6px;right:6px;width:26px;height:26px;border-radius:2px;border:1px solid var(--line);background:linear-gradient(#59626a,#464e55);box-shadow:inset 0 1px 0 #7b858e;cursor:pointer;display:grid;place-items:center;padding:0}
+.scrub{margin:6px 0 0;width:100%}#scrub{--f:var(--ok)}
+.track{height:22px;border-radius:2px;background:var(--well);border:1px solid var(--line);box-shadow:inset 0 1px 3px rgba(0,0,0,.5);position:relative;margin-top:6px}
+.ball{position:absolute;top:2px;width:14px;height:14px;border-radius:50%;background:var(--ac);border:1px solid #7a4a0c}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:8px 0}
+.stats>div{background:var(--well);border:1px solid var(--line);border-radius:2px;padding:5px 8px;box-shadow:inset 0 1px 3px rgba(0,0,0,.5)}
+.stats small{display:block;color:var(--mut);font-size:10.5px}.stats b{font:500 13px var(--mono);color:var(--ac);font-variant-numeric:tabular-nums}
+.row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;align-items:end}
+@media(max-width:520px){.row{grid-template-columns:1fr}.stats b{font-size:12px}}
+label{display:block;color:var(--mut);font-size:11px;margin-bottom:3px}
+select,.num{padding:5px 6px;border-radius:2px;background:var(--well);color:var(--tx);border:1px solid var(--line);font:12px Inter,"Helvetica Neue",Helvetica,Arial,sans-serif;box-shadow:inset 0 1px 2px rgba(0,0,0,.5)}
+select{width:100%}.num{font-family:var(--mono);text-align:right;font-variant-numeric:tabular-nums}
+.sl{display:grid;grid-template-columns:1fr 70px;align-items:center;gap:8px}.sl input[type=range]{width:100%}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:8px 14px;margin-top:10px;padding-top:10px;border-top:1px solid var(--line)}
+@media(max-width:520px){.grid{grid-template-columns:1fr}}
+.btns{display:flex;justify-content:space-between;gap:8px;margin:12px 0 8px}
+button.b{padding:6px 14px;border-radius:2px;border:1px solid var(--line);font:500 12px Inter,"Helvetica Neue",Helvetica,Arial,sans-serif;cursor:pointer;background:linear-gradient(#59626a,#464e55);color:var(--tx);box-shadow:inset 0 1px 0 #7b858e}
+button.b.p{background:linear-gradient(#f7ad4a,#d98512);color:#2a1a04;box-shadow:inset 0 1px 0 #fcc983}
+button.b:active,.pp:active{filter:brightness(.88)}
+.hd{display:flex;justify-content:space-between;color:var(--mut);font-size:10.5px;margin-bottom:4px}
+pre{margin:0;padding:8px 10px;background:var(--well);border:1px solid var(--line);border-radius:2px;box-shadow:inset 0 1px 3px rgba(0,0,0,.5);overflow-x:auto;font:11.5px/1.5 var(--mono);color:#c3ccd3;max-height:280px}
+input[type=range]{-webkit-appearance:none;appearance:none;height:18px;background:transparent;margin:0;cursor:pointer;--f:var(--ac);--p:0%}
+input[type=range]::-webkit-slider-runnable-track{box-sizing:border-box;height:8px;background:linear-gradient(90deg,var(--f) var(--p),var(--well) var(--p));border:1px solid var(--line);border-radius:1px;box-shadow:inset 0 1px 2px rgba(0,0,0,.6)}
+input[type=range]::-moz-range-track{box-sizing:border-box;height:8px;background:linear-gradient(90deg,var(--f) var(--p),var(--well) var(--p));border:1px solid var(--line);border-radius:1px}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;box-sizing:border-box;width:10px;height:18px;margin-top:-6px;border:1px solid var(--line);border-radius:1px;background:linear-gradient(90deg,transparent 4px,var(--line) 4px,var(--line) 5px,transparent 5px),linear-gradient(#838d96,#58616a);box-shadow:inset 0 1px 0 #a7b0b8}
+input[type=range]::-moz-range-thumb{box-sizing:border-box;width:10px;height:18px;border:1px solid var(--line);border-radius:1px;background:linear-gradient(90deg,transparent 4px,var(--line) 4px,var(--line) 5px,transparent 5px),linear-gradient(#838d96,#58616a)}
+button:focus-visible,select:focus-visible,input:focus-visible{outline:1px solid var(--ac);outline-offset:1px}
+</style>
+
+</head>
+<body>
+<div class="wrap">
+<div class="card">
+<h1>Curve Lab</h1>
+<p class="sub">Tangent sama di tiap titik sambung (garis hijau), jadi kurva selalu mulus. Titik putih: posisi. Titik biru: bentuk kurva. Nilai tersimpan otomatis di browser.</p>
+<div class="plot"><svg id="svg" viewBox="0 0 560 300"></svg>
+<button class="pp" id="pp" aria-label="Putar atau jeda"></button></div>
+<input class="scrub" id="scrub" type="range" min="0" max="1000" value="0" aria-label="Scrub waktu">
+<div class="track"><div class="ball" id="ball"></div></div>
+<div class="stats"><div><small>Waktu (t)</small><b id="sT"></b></div><div><small>Posisi X</small><b id="sX"></b></div><div><small>Segmen Aktif</small><b id="sS"></b></div></div>
+<div class="row">
+<div><label for="selSeg">Pilih Segmen</label><select id="selSeg"></select></div>
+<div><label for="selType">Gaya Segmen</label><select id="selType"></select></div>
+<div><label for="dur">Durasi Total Gerak</label><div class="sl"><input id="dur" type="range" min="0.5" max="10" step="0.1"><input id="durN" class="num" type="number" min="0.5" max="10" step="0.1"></div></div>
+</div>
+<div class="grid" id="sliders"></div>
+<div class="btns"><button class="b" id="reset">Reset Default</button><button class="b p" id="copy">Salin Pseudo Keyframes</button></div>
+<div class="hd"><span>Format Pseudo-Keyframes (Ekspor AI)</span><span>Kompatibel format CSS &amp; LLM</span></div>
+<pre id="code"></pre>
+</div>
+</div>
+<script>
+const NAMES=['Awal','Tengah 1','Tengah 2','Akhir'];
+const TYPES={auto:'Otomatis (Mulus)',manual:'Bezier Manual','ease-in':'Ease In','ease-out':'Ease Out','ease-in-out':'Ease In Out'};
+const def=()=>({dur:3,nodes:[{t:0,v:.2,m:0,auto:false},{t:.22,v:.5,m:0,auto:true},{t:.47,v:.78,m:0,auto:true},{t:.75,v:.86,m:0,auto:true},{t:1,v:1,m:0,auto:false}],
+segs:[{type:'manual',a:.4,b:.4},{type:'auto',a:.4,b:.4},{type:'auto',a:.4,b:.4},{type:'manual',a:.4,b:.4}]});
+let S=def(),sel=0,t=0,playing=true,drag=null,last=performance.now();
+const $=id=>document.getElementById(id);
+const W=560,H=300,PL=46,PR=20,PT=16,PB=30,DMIN=-.2,DMAX=1.2;
+const X=u=>PL+u*(W-PL-PR),Y=v=>PT+(DMAX-v)/(DMAX-DMIN)*(H-PT-PB);
+const iX=x=>(x-PL)/(W-PL-PR),iY=y=>DMAX-(y-PT)/(H-PT-PB)*(DMAX-DMIN);
+const cl=(a,lo,hi)=>Math.max(lo,Math.min(hi,a));
+const KEY='curvelab:v1';
+function fill(el){const mn=+el.min,mx=+el.max;el.style.setProperty('--p',((+el.value-mn)/(mx-mn)*100)+'%')}
+function save(){try{localStorage.setItem(KEY,JSON.stringify({S,sel}))}catch(e){}}
+function load(){try{const r=localStorage.getItem(KEY);if(!r)return;const o=JSON.parse(r),d=o&&o.S;
+if(d&&isFinite(d.dur)&&Array.isArray(d.nodes)&&d.nodes.length===5&&Array.isArray(d.segs)&&d.segs.length===4&&d.nodes.every(n=>isFinite(n.t)&&isFinite(n.v)&&isFinite(n.m))&&d.segs.every(g=>isFinite(g.a)&&isFinite(g.b)&&TYPES[g.type])){S=d;sel=cl(+o.sel||0,0,3)}}catch(e){}}
+function autoSlopes(){const n=S.nodes,sec=[0,1,2,3].map(i=>(n[i+1].v-n[i].v)/(n[i+1].t-n[i].t));
+n.forEach((p,k)=>{if(p.auto)p.m=k===0?sec[0]:k===4?sec[3]:(sec[k-1]+sec[k])/2})}
+function geo(i){const A=S.nodes[i],B=S.nodes[i+1],g=S.segs[i],dt=B.t-A.t;
+return{A,B,g,dt,x:[A.t,A.t+g.a*dt,B.t-g.b*dt,B.t],y:[A.v,A.v+A.m*g.a*dt,B.v-B.m*g.b*dt,B.v]}}
+const bz=(p,s)=>(1-s)**3*p[0]+3*(1-s)**2*s*p[1]+3*(1-s)*s*s*p[2]+s**3*p[3];
+function segAt(x){for(let i=0;i<4;i++)if(x<=S.nodes[i+1].t)return i;return 3}
+function val(x){const G=geo(segAt(x));let lo=0,hi=1,s=.5;for(let k=0;k<30;k++){s=(lo+hi)/2;bz(G.x,s)<x?lo=s:hi=s}return bz(G.y,s)}
+const f1=n=>(n*100).toFixed(1)+'%';
+function draw(){
+let h='';
+for(let i=0;i<4;i++){const a=X(S.nodes[i].t),b=X(S.nodes[i+1].t);
+h+=`<rect data-d="seg:${i}" x="${a}" y="${PT}" width="${b-a}" height="${H-PT-PB}" fill="${i===sel?'rgba(243,156,45,.12)':'transparent'}"/>`;
+h+=`<text x="${(a+b)/2}" y="${PT+12}" text-anchor="middle" font-size="11" fill="${i===sel?'var(--ac)':'var(--mut)'}">${NAMES[i]}</text>`;
+h+=`<line x1="${b}" x2="${b}" y1="${PT}" y2="${H-PT-PB+PT}" stroke="var(--grid2)" stroke-dasharray="2 4"/>`}
+[0,.25,.5,.75,1].forEach(v=>{h+=`<line x1="${PL}" x2="${W-PR}" y1="${Y(v)}" y2="${Y(v)}" stroke="var(--grid)"/><text x="${PL-8}" y="${Y(v)+4}" text-anchor="end" font-size="11" fill="var(--mut)">${v.toFixed(2)}</text>`});
+S.nodes.forEach(n=>{h+=`<text x="${X(n.t)}" y="${H-10}" text-anchor="middle" font-size="11" fill="var(--mut)">${Math.round(n.t*100)}%</text>`});
+for(let i=0;i<4;i++){const G=geo(i);let d='';
+for(let k=0;k<=40;k++){const s=k/40;d+=(k?'L':'M')+X(bz(G.x,s)).toFixed(1)+' '+Y(bz(G.y,s)).toFixed(1)}
+h+=`<path d="${d}" fill="none" stroke="${i===sel?'var(--ac)':'#7d8791'}" stroke-width="${i===sel?2.5:1.5}" stroke-linecap="round" stroke-linejoin="round"/>`}
+S.nodes.forEach((n,k)=>{if(k>0&&k<4){const e=.045;h+=`<line x1="${X(n.t-e)}" y1="${Y(n.v-e*n.m)}" x2="${X(n.t+e)}" y2="${Y(n.v+e*n.m)}" stroke="var(--ok)" stroke-width="2" opacity=".75"/>`}});
+const G=geo(sel);
+[[G.x[0],G.y[0],G.x[1],G.y[1],'h0'],[G.x[3],G.y[3],G.x[2],G.y[2],'h1']].forEach(q=>{
+h+=`<line x1="${X(q[0])}" y1="${Y(q[1])}" x2="${X(q[2])}" y2="${Y(q[3])}" stroke="var(--hd)" stroke-dasharray="2 3"/><circle data-d="${q[4]}" cx="${X(q[2])}" cy="${Y(q[3])}" r="6" fill="var(--well)" stroke="var(--hd)" stroke-width="2" style="cursor:grab"/>`});
+S.nodes.forEach((n,i)=>{h+=`<circle data-d="n:${i}" cx="${X(n.t)}" cy="${Y(n.v)}" r="5.5" fill="var(--tx)" stroke="var(--line)" stroke-width="1.5" style="cursor:grab"/>`});
+const cx=X(t),cy=Y(val(t));
+h+=`<line x1="${cx}" x2="${cx}" y1="${PT}" y2="${H-PB}" stroke="var(--hot)" stroke-dasharray="4 4"/><circle cx="${cx}" cy="${cy}" r="6" fill="var(--hot)" stroke="var(--well)" stroke-width="1.5"/>`;
+$('svg').innerHTML=h}
+function readout(){const i=segAt(t);$('sT').textContent=(t*S.dur).toFixed(2).replace('.',',')+' s';$('sX').textContent=(t*100).toFixed(1).replace('.',',')+'%';
+$('sS').textContent='#'+(i+1)+' ('+TYPES[S.segs[i].type].split(' (')[0]+')';$('ball').style.left='calc(3px + '+cl(val(t),0,1)+' * (100% - 20px))';$('scrub').value=Math.round(t*1000);fill($('scrub'))}
+function code(){const n=S.nodes;let o='/* AI ANIMATION PSEUDO-KEYFRAMES */\n// Segmen: 4 kurva gerak terkalibrasi | Total Durasi: '+S.dur.toFixed(1)+'s\n// progress = posisi normalisasi objek (0% awal, 100% tujuan).\n// Sambungan antar segmen MULUS (tangent sama di kedua sisi titik), tidak ada sudut patah.\n@keyframes customMultiSegmentMotion {\n';
+for(let i=0;i<4;i++){const G=geo(i),dv=G.B.v-G.A.v,y1=Math.abs(dv)>.001?G.A.m*G.g.a*G.dt/dv:0,y2=Math.abs(dv)>.001?1-G.B.m*G.g.b*G.dt/dv:1;
+const ms=Math.round(G.dt*S.dur*1000),tg=i===0?'tangent awal':'titik sambung mulus, tangent';
+o+=`  /* Segmen ${i+1} (${NAMES[i]}): ${S.segs[i].type.toUpperCase()} | ${ms}ms */\n  ${(G.A.t*100).toFixed(1)}% {\n    progress: ${f1(G.A.v)};  /* ${tg} ${G.A.m.toFixed(2)} */\n    timing-function: cubic-bezier(${[G.g.a,y1,1-G.g.b,y2].map(q=>+q.toFixed(2)).join(', ')});\n  }\n`}
+o+=`  100.0% {\n    progress: ${f1(n[4].v)};  /* tangent akhir ${n[4].m.toFixed(2)} */\n  }\n}`;$('code').textContent=o}
+const SL=[['av','Progress awal segmen',0,1,.01],['bv','Progress akhir segmen',0,1,.01],['h0','Panjang handle keluar',.05,.9,.01],['h1','Kemiringan titik awal',-6,6,.05],['h2','Panjang handle masuk',.05,.9,.01],['h3','Kemiringan titik akhir',-6,6,.05]];
+function build(){$('selSeg').innerHTML=NAMES.map((n,i)=>`<option value="${i}">${i+1}. ${n}</option>`).join('');
+$('selType').innerHTML=Object.entries(TYPES).map(([k,v])=>`<option value="${k}">${v}</option>`).join('');
+$('sliders').innerHTML=SL.map(s=>`<div><label>${s[1]}</label><div class="sl"><input id="${s[0]}" type="range" min="${s[2]}" max="${s[3]}" step="${s[4]}"><input id="${s[0]}N" class="num" type="number" min="${s[2]}" max="${s[3]}" step="${s[4]}"></div></div>`).join('');
+SL.forEach(s=>['','N'].forEach(sf=>$(s[0]+sf).addEventListener('input',e=>{if(e.target.value==='')return;const v=cl(+e.target.value,s[2],s[3]),id=s[0],g=S.segs[sel],A=S.nodes[sel],B=S.nodes[sel+1];
+if(id==='av')A.v=v;else if(id==='bv')B.v=v;else{g.type='manual';
+if(id==='h0'){g.a=v;g.b=Math.min(g.b,.95-v)}if(id==='h1'){A.m=v;A.auto=false}
+if(id==='h2'){g.b=v;g.a=Math.min(g.a,.95-v)}if(id==='h3'){B.m=v;B.auto=false}}render()})))}
+function sync(){const g=S.segs[sel],A=S.nodes[sel],B=S.nodes[sel+1];
+$('selSeg').value=sel;$('selType').value=g.type;$('dur').value=S.dur;if(document.activeElement!==$('durN'))$('durN').value=S.dur.toFixed(1);
+const vals={av:A.v,bv:B.v,h0:g.a,h1:A.m,h2:g.b,h3:B.m};
+SL.forEach(s=>{$(s[0]).value=vals[s[0]];const n=$(s[0]+'N');if(document.activeElement!==n)n.value=vals[s[0]].toFixed(2)})}
+function render(){autoSlopes();sync();draw();readout();code();save();document.querySelectorAll('input[type=range]').forEach(fill)}
+function pt(e){const sv=$('svg'),p=sv.createSVGPoint();p.x=e.clientX;p.y=e.clientY;return p.matrixTransform(sv.getScreenCTM().inverse())}
+$('svg').addEventListener('pointerdown',e=>{const d=e.target.dataset.d;if(!d)return;e.preventDefault();
+if(d.startsWith('seg:')){sel=+d.slice(4);render();return}
+drag=d;if(d[0]==='n')sel=Math.min(+d.slice(2),3);render()});
+window.addEventListener('pointermove',e=>{if(!drag)return;const q=pt(e),u=iX(q.x),v=iY(q.y);
+if(drag[0]==='n'){const k=+drag.slice(2),n=S.nodes[k];n.v=cl(v,0,1);if(k>0&&k<4)n.t=cl(u,S.nodes[k-1].t+.04,S.nodes[k+1].t-.04)}
+else{const G=geo(sel),g=G.g;g.type='manual';
+if(drag==='h0'){const lo=.05*G.dt,dx=cl(u-G.A.t,lo,Math.max(lo,(.95-g.b)*G.dt));g.a=dx/G.dt;G.A.m=cl((v-G.A.v)/dx,-6,6);G.A.auto=false}
+else{const lo=.05*G.dt,dx=cl(G.B.t-u,lo,Math.max(lo,(.95-g.a)*G.dt));g.b=dx/G.dt;G.B.m=cl((G.B.v-v)/dx,-6,6);G.B.auto=false}}
+render()});
+window.addEventListener('pointerup',()=>{drag=null});
+$('selSeg').addEventListener('change',e=>{sel=+e.target.value;render()});
+$('selType').addEventListener('change',e=>{const ty=e.target.value,g=S.segs[sel],A=S.nodes[sel],B=S.nodes[sel+1];g.type=ty;
+if(ty==='auto'){A.auto=B.auto=true;g.a=g.b=.4}
+if(ty==='ease-in'){A.m=0;A.auto=false;B.auto=true;g.a=.5;g.b=.33}
+if(ty==='ease-out'){B.m=0;B.auto=false;A.auto=true;g.a=.33;g.b=.5}
+if(ty==='ease-in-out'){A.m=B.m=0;A.auto=B.auto=false;g.a=g.b=.5}render()});
+['dur','durN'].forEach(id=>$(id).addEventListener('input',e=>{const v=parseFloat(e.target.value);if(isNaN(v))return;S.dur=cl(v,.5,10);render()}));
+$('scrub').addEventListener('input',e=>{t=e.target.value/1000;setPlay(false);render()});
+$('reset').addEventListener('click',()=>{S=def();sel=0;t=0;render()});
+$('copy').addEventListener('click',async()=>{const tx=$('code').textContent;try{await navigator.clipboard.writeText(tx)}catch(_){const a=document.createElement('textarea');a.value=tx;document.body.appendChild(a);a.select();try{document.execCommand('copy')}catch(__){}a.remove()}
+$('copy').textContent='Tersalin';setTimeout(()=>$('copy').textContent='Salin untuk AI',1400)});
+const ICON={pause:'<svg width="14" height="14" viewBox="0 0 14 14"><rect x="2" y="1" width="3.5" height="12" fill="#f39c2d"/><rect x="8.5" y="1" width="3.5" height="12" fill="#f39c2d"/></svg>',play:'<svg width="14" height="14" viewBox="0 0 14 14"><path d="M3 1l10 6-10 6z" fill="#f39c2d"/></svg>'};
+function setPlay(p){playing=p;$('pp').innerHTML=p?ICON.pause:ICON.play;last=performance.now()}
+$('pp').addEventListener('click',()=>{if(!playing&&t>=1)t=0;setPlay(!playing)});
+function loop(n){const dt=(n-last)/1000;last=n;if(playing&&!drag){t+=dt/S.dur;if(t>1)t=0;draw();readout()}requestAnimationFrame(loop)}
+load();build();setPlay(true);render();requestAnimationFrame(loop);
+</script>
+</body>
+</html>
